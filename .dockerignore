@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+vendor
+node_modules
+storage
+bootstrap/cache/*.php
+public/storage
+public/hot
+tests
+**/*.pem
+**/*.key
+**/*.sql
+**/*.log
