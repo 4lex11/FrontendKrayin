@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'sales_filters' => 'Sales filters',
+    'month_values' => 'View monthly values',
     'crm_dashboard' => 'View sales pipeline dashboard',
     'prediction_title' => '180-day prediction summary',
     'prediction_cutoff' => 'Prediction cutoff date',

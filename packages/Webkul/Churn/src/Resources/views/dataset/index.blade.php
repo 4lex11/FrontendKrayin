@@ -1,50 +1,65 @@
+@push('styles')
+    @include('churn::dataset.dashboard-styles')
+@endpush
+
 <x-admin::layouts>
     <x-slot:title>{{ __('churn::dataset.title') }}</x-slot>
 
     @php($labels = __('churn::dataset.values'))
-    <div class="flex flex-col gap-4">
-        <header class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <h1 class="text-xl font-bold">{{ __('churn::dataset.title') }}</h1>
-            <p class="mt-2 text-sm">{{ __('churn::dataset.description') }}</p>
-            <a class="mt-3 inline-block text-brandColor underline" href="{{ route('admin.churn.index') }}">{{ __('churn::app.title') }}</a>
-            <a class="secondary-button mt-3 inline-flex" href="{{ route('admin.churn.dataset.explore', \Illuminate\Support\Arr::except($filters, ['prediction_cutoff'])) }}">{{ __('churn::dataset.explore') }}</a>
-            @if (bouncer()->hasPermission('dashboard'))
-                <a class="mt-3 inline-block text-brandColor underline" href="{{ route('admin.dashboard.index', ['view' => 'crm']) }}">{{ __('churn::dataset.crm_dashboard') }}</a>
-            @endif
+    <div class="sales-dashboard">
+        <header class="sales-heading">
+            <div>
+                <h1>{{ __('churn::dataset.title') }}</h1>
+                <p>{{ __('churn::dataset.description') }}</p>
+            </div>
+            <div class="sales-actions">
+                @if (bouncer()->hasPermission('dashboard'))
+                    <a class="sales-link" href="{{ route('admin.dashboard.index', ['view' => 'crm']) }}">{{ __('churn::dataset.crm_dashboard') }}</a>
+                @endif
+                <a class="sales-button" href="{{ route('admin.churn.dataset.explore', \Illuminate\Support\Arr::except($filters, ['prediction_cutoff'])) }}">{{ __('churn::dataset.explore') }}</a>
+            </div>
         </header>
 
-        <form method="GET" action="{{ route($dashboardRoute) }}" class="flex flex-wrap items-end gap-4 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            @include('churn::dataset.filter-fields')
+        <form method="GET" action="{{ route($dashboardRoute) }}" class="sales-filter sales-panel" aria-label="{{ __('churn::dataset.sales_filters') }}">
+            <div class="sales-filter-fields">@include('churn::dataset.filter-fields')</div>
             <input type="hidden" name="prediction_cutoff" value="{{ $cutoff }}">
-            <button class="primary-button" type="submit">{{ __('churn::dataset.apply') }}</button>
-            <a class="secondary-button" href="{{ route($dashboardRoute, ['prediction_cutoff' => $cutoff]) }}">{{ __('churn::dataset.reset') }}</a>
+            <div class="sales-actions">
+                <button class="sales-button" type="submit">{{ __('churn::dataset.apply') }}</button>
+                <a class="sales-link" href="{{ route($dashboardRoute, ['prediction_cutoff' => $cutoff]) }}">{{ __('churn::dataset.reset') }}</a>
+            </div>
         </form>
 
-        @if ($summary['lines'] > 0)
-            <p class="text-sm">{{ __('churn::dataset.period', [
-                'from' => \Illuminate\Support\Facades\Date::parse($summary['first_date'])->format('d/m/Y'),
-                'to' => \Illuminate\Support\Facades\Date::parse($summary['last_date'])->format('d/m/Y'),
-            ]) }}</p>
-        @else
-            <p role="status">{{ __('churn::dataset.empty') }}</p>
-        @endif
-
-        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            @foreach (['customers' => 0, 'orders' => 0, 'lines' => 0, 'sales' => 2, 'average_order' => 2] as $metric => $precision)
-                <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-                    <dt class="text-sm">{{ __('churn::dataset.metrics.'.$metric) }}</dt>
-                    <dd class="my-2 text-2xl font-bold" data-testid="dataset-{{ $metric }}">
+        <dl class="sales-kpis sales-panel">
+            @foreach (['sales' => 2, 'customers' => 0, 'orders' => 0, 'lines' => 0, 'average_order' => 2] as $metric => $precision)
+                <div class="sales-kpi {{ $metric === 'sales' ? 'sales-kpi-primary' : '' }}">
+                    <dt title="{{ __('churn::dataset.definitions.'.$metric) }}">{{ __('churn::dataset.metrics.'.$metric) }}</dt>
+                    <dd data-testid="dataset-{{ $metric }}">
                         {{ $summary[$metric] === null ? '—' : \Illuminate\Support\Number::format((float) $summary[$metric], $precision, locale: app()->getLocale()) }}
                     </dd>
-                    <dd class="text-sm">{{ __('churn::dataset.definitions.'.$metric) }}</dd>
+                    @if ($metric === 'sales' && $summary['lines'] > 0)
+                        <dd class="sales-period">{{ __('churn::dataset.period', [
+                            'from' => \Illuminate\Support\Facades\Date::parse($summary['first_date'])->format('d/m/Y'),
+                            'to' => \Illuminate\Support\Facades\Date::parse($summary['last_date'])->format('d/m/Y'),
+                        ]) }}</dd>
+                    @endif
                 </div>
             @endforeach
         </dl>
+        @if ($summary['lines'] > 0)
+            <div class="sales-overview">
+                @include('churn::dataset.monthly-chart', ['points' => $charts['month']])
+                @include('churn::dataset.chart', ['dimension' => 'category', 'points' => $charts['category']])
+            </div>
+        @else
+            <p class="sales-panel sales-empty" role="status">{{ __('churn::dataset.empty') }}</p>
+        @endif
         @include('churn::dataset.predictions')
         @if ($summary['lines'] > 0)
-            <div class="grid gap-4 lg:grid-cols-2">
+            <div class="sales-breakdown">
                 @foreach ($charts as $dimension => $points)
-                    @include('churn::dataset.chart')
+                    @if (! in_array($dimension, ['month', 'category'], true))
+                        @include('churn::dataset.chart')
+                    @endif
                 @endforeach
             </div>
         @endif

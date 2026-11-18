@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- [Churn] Diseño adaptable del tablero histórico con indicadores compactos y una gráfica mensual de columnas.
 - [Churn] El tablero inicial muestra los datos históricos del proyecto a los usuarios autorizados.
 - [Churn] Resumen de elegibilidad y riesgos por fecha de corte y versión del modelo.
 - [Churn] Historial paginado por cliente y detalle por pedido, con enlaces a las predicciones guardadas.

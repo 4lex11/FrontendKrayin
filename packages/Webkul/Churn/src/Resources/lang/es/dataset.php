@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'sales_filters' => 'Filtros de ventas',
+    'month_values' => 'Consultar valores mensuales',
     'crm_dashboard' => 'Ver tablero comercial',
     'prediction_title' => 'Resumen de predicciones a 180 días',
     'prediction_cutoff' => 'Fecha de corte de predicciones',
