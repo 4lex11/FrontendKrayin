@@ -16,6 +16,7 @@
     <div id="churn-panel" class="flex flex-col gap-4">
         <header class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             <h1 class="text-xl font-bold dark:text-white">{{ __('churn::app.title') }}</h1>
+            <a class="text-brandColor underline" href="{{ route('admin.churn.dataset.index') }}">{{ __('churn::dataset.title') }}</a>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ __('churn::app.description') }}</p>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ __('churn::app.model') }}: {{ $modelVersion }} · {{ __('churn::app.cutoff') }}: {{ \Illuminate\Support\Facades\Date::parse($filters['as_of'])->format('d/m/Y') }}</p>
         </header>

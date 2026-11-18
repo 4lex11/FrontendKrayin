@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- [Churn] Resumen de elegibilidad y riesgos por fecha de corte y versión del modelo.
+- [Churn] Historial paginado por cliente y detalle por pedido, con enlaces a las predicciones guardadas.
+- [Churn] Explorador paginado de 18 columnas con búsqueda, orden y exportación CSV según permisos.
+- [Churn] Gráficos de ventas por mes, categoría, subcategoría, segmento y región con filtros compartidos.
+- [Churn] Resumen de Superstore con indicadores de ventas, filtro por fecha de compra y visibilidad por usuario.
+- [Churn] Importación de las 18 columnas de Superstore y actualización idempotente de líneas existentes.
+- [Churn] Esquema para conservar los datos originales de envío, segmento, ubicación y producto de cada línea de Superstore.
 - [Localización] Mensajes en español de validación, autenticación, recuperación de contraseña, paginación y componentes del panel.
 - [Localización] Español predeterminado y formatos de fecha y número en el panel de predicciones.
 - [Deployment] Isolated Render Docker profile with HTTPS, private API credentials, database sessions, bounded Apache processes and a Churn worker. Linux build validation remains pending.

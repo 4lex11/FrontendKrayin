@@ -25,15 +25,16 @@ class DatasetRepository implements DatasetRepositoryContract
                 throw new RuntimeException('El responsable debe ser un usuario activo.');
             }
             $attribute = DB::table('attributes')->where('entity_type', 'persons')->where('code', 'customer_id')->first();
-            $result = ['dry_run' => $dryRun, 'customers' => 0, 'reused_contacts' => 0, 'created_contacts' => 0, 'existing_mappings' => 0, 'lines_inserted' => 0, 'lines_unchanged' => 0, 'sha256' => $hash, 'default_cutoff' => $cutoff];
+            $result = ['dry_run' => $dryRun, 'customers' => 0, 'reused_contacts' => 0, 'created_contacts' => 0, 'existing_mappings' => 0, 'lines_inserted' => 0, 'lines_enriched' => 0, 'lines_unchanged' => 0, 'sha256' => $hash, 'default_cutoff' => $cutoff];
             $mapping = [];
+            $existingCustomers = DatasetCustomer::where('source', $source)->get()->keyBy('external_customer_id');
             foreach ($rows as $row) {
                 $external = $row['customer_id'];
                 if (array_key_exists($external, $mapping)) {
                     continue;
                 }
                 $result['customers']++;
-                $customer = DatasetCustomer::where('source', $source)->where('external_customer_id', $external)->first();
+                $customer = $existingCustomers->get($external);
                 if ($customer) {
                     if ($customer->dataset_name !== $row['customer_name']) {
                         throw new RuntimeException('Nombre del dataset incompatible con el mapeo registrado.');
@@ -70,9 +71,12 @@ class DatasetRepository implements DatasetRepositoryContract
                 }
                 $mapping[$external] = $customer?->id;
             }
+            $existingLines = SalesLine::where('source', $source)->get()->keyBy('line_id');
+            $enrichment = [];
             foreach ($rows as $row) {
                 $values = ['dataset_customer_id' => $mapping[$row['customer_id']], 'source' => $source, 'line_id' => $row['line_id'], 'order_id' => $row['order_id'], 'order_date' => $row['order_date'], 'sales' => $row['sales'], 'category' => $row['category'], 'subcategory' => $row['subcategory']];
-                $line = SalesLine::where('source', $source)->where('line_id', $row['line_id'])->first();
+                $line = $existingLines->get($row['line_id']);
+                $original = $row['original_fields'] ?? [];
                 if ($line) {
                     foreach ($values as $key => $value) {
                         $equal = $key === 'sales' ? bccomp((string) $line->$key, (string) $value, 6) === 0 : (string) $line->$key === (string) $value;
@@ -80,12 +84,33 @@ class DatasetRepository implements DatasetRepositoryContract
                             throw new RuntimeException('Una línea existente difiere del archivo; importación cancelada.');
                         }
                     }
-                    $result['lines_unchanged']++;
+                    $updates = [];
+                    foreach ($original as $key => $value) {
+                        if ($line->$key === null && $value !== null) {
+                            $updates[$key] = $value;
+                        } elseif ($line->$key !== $value) {
+                            throw new RuntimeException('Un campo original difiere del archivo; importación cancelada.');
+                        }
+                    }
+                    if ($updates === []) {
+                        $result['lines_unchanged']++;
+                    } else {
+                        if (! $dryRun) {
+                            ksort($updates);
+                            $enrichment[implode(',', array_keys($updates))][] = $values + $updates;
+                        }
+                        $result['lines_enriched']++;
+                    }
                 } else {
                     if (! $dryRun) {
-                        SalesLine::create($values);
+                        SalesLine::create($values + $original);
                     }
                     $result['lines_inserted']++;
+                }
+            }
+            foreach ($enrichment as $columns => $lines) {
+                foreach (array_chunk($lines, 150) as $batch) {
+                    SalesLine::upsert($batch, ['source', 'line_id'], explode(',', $columns));
                 }
             }
             if (! $dryRun && $dataset->sha256 === null) {

@@ -9,6 +9,19 @@ class SuperstoreCsv
 {
     public const SHA256 = 'dbb0f167b27ccf02d7ff8cb0446a9abc6dbc3522e83cf9daa6939801acfdd196';
 
+    private const ORIGINAL_FIELDS = [
+        'Ship Date' => 'ship_date',
+        'Ship Mode' => 'ship_mode',
+        'Segment' => 'segment',
+        'Country' => 'country',
+        'City' => 'city',
+        'State' => 'state',
+        'Postal Code' => 'postal_code',
+        'Region' => 'region',
+        'Product ID' => 'product_id',
+        'Product Name' => 'product_name',
+    ];
+
     public function read(string $path): array
     {
         if (! is_file($path) || ! is_readable($path)) {
@@ -21,6 +34,10 @@ class SuperstoreCsv
             if (! is_array($header) || array_diff($required, $header) || count($header) !== count(array_unique($header))) {
                 throw new InvalidArgumentException('Cabecera CSV inválida.');
             }
+            $extraFields = array_intersect(array_keys(self::ORIGINAL_FIELDS), $header);
+            if ($extraFields && count($extraFields) !== count(self::ORIGINAL_FIELDS)) {
+                throw new InvalidArgumentException('Faltan columnas originales del dataset.');
+            }
             $rows = [];
             $names = [];
             $orders = [];
@@ -30,6 +47,9 @@ class SuperstoreCsv
                 }
                 $raw = array_combine($header, $values);
                 $row = $this->normalize($raw);
+                if ($extraFields) {
+                    $row['original_fields'] = $this->normalizeOriginalFields($raw);
+                }
                 if (isset($rows[$row['line_id']])) {
                     throw new InvalidArgumentException('Row ID duplicado.');
                 }
@@ -53,6 +73,39 @@ class SuperstoreCsv
         } finally {
             fclose($handle);
         }
+    }
+
+    private function normalizeOriginalFields(array $raw): array
+    {
+        $fields = [];
+        foreach (self::ORIGINAL_FIELDS as $header => $column) {
+            $value = $raw[$header];
+            if ($column === 'ship_date') {
+                $date = DateTimeImmutable::createFromFormat('!d/m/Y', $value);
+                if (! $date || $date->format('d/m/Y') !== $value) {
+                    throw new InvalidArgumentException('Fecha de envío inválida.');
+                }
+                $fields[$column] = $date->format('Y-m-d');
+
+                continue;
+            }
+            if ($column === 'postal_code' && $value === '') {
+                $fields[$column] = null;
+
+                continue;
+            }
+            $maxLength = match ($column) {
+                'postal_code' => 32,
+                'product_name' => 255,
+                default => 100,
+            };
+            if (trim($value) === '' || mb_strlen($value) > $maxLength) {
+                throw new InvalidArgumentException('Valor inválido en la columna '.$header.'.');
+            }
+            $fields[$column] = $value;
+        }
+
+        return $fields;
     }
 
     private function normalize(array $raw): array
