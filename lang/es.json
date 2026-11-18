@@ -1,0 +1,21 @@
+{
+    "Add Attachments": "Agregar archivos adjuntos",
+    "Add Location ": "Agregar ubicación",
+    "Enter message to display": "Escribe el mensaje que se mostrará",
+    "Enter url to redirect": "Escribe la URL de destino",
+    "No results found.": "No se encontraron resultados.",
+    "Save Email Template": "Guardar plantilla de correo",
+    "Key": "Clave",
+    "Save Lead": "Guardar oportunidad",
+    "Save": "Guardar",
+    "Submit Success Action": "Acción tras el envío correcto",
+    "Value": "Valor",
+    "Search...": "Buscar...",
+    "Unauthorized": "Acceso no autorizado",
+    "Forbidden": "Acceso denegado",
+    "Not Found": "Página no encontrada",
+    "Page Expired": "La sesión de la página caducó",
+    "Too Many Requests": "Demasiadas solicitudes",
+    "Server Error": "Error del servidor",
+    "Service Unavailable": "Servicio no disponible"
+}

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- [Localización] Mensajes en español de validación, autenticación, recuperación de contraseña, paginación y componentes del panel.
 - [Localización] Español predeterminado y formatos de fecha y número en el panel de predicciones.
 - [Deployment] Isolated Render Docker profile with HTTPS, private API credentials, database sessions, bounded Apache processes and a Churn worker. Linux build validation remains pending.
 - [Churn] Seguimiento manual por cliente/corte/versión con responsable, nota, estados, autoría, historial y control de cambios concurrentes.

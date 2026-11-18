@@ -196,7 +196,7 @@
 
                 placeholder: {
                     type: String,
-                    default: 'Search...',
+                    default: @js(__('Search...')),
                 },
 
                 url: {
