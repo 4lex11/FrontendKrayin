@@ -1,7 +1,7 @@
 <section class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
     <h2 class="text-lg font-semibold">{{ __('churn::dataset.prediction_title') }}</h2>
     <p class="mt-2 text-sm">{{ __('churn::dataset.prediction_scope') }}</p>
-    <form method="GET" action="{{ route('admin.churn.dataset.index') }}" class="my-4 flex flex-wrap items-end gap-3">
+    <form method="GET" action="{{ route($dashboardRoute) }}" class="my-4 flex flex-wrap items-end gap-3">
         @foreach (\Illuminate\Support\Arr::except($filters, ['prediction_cutoff']) as $filter => $value)
             <input type="hidden" name="{{ $filter }}" value="{{ $value }}">
         @endforeach

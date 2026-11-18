@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'crm_dashboard' => 'Ver tablero comercial',
     'prediction_title' => 'Resumen de predicciones a 180 días',
     'prediction_cutoff' => 'Fecha de corte de predicciones',
     'prediction_scope' => 'Incluye tus clientes visibles del dataset. Los filtros de ventas solo se aplican a los indicadores y gráficos de ventas.',

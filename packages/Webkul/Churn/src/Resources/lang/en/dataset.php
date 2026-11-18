@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'crm_dashboard' => 'View sales pipeline dashboard',
     'prediction_title' => '180-day prediction summary',
     'prediction_cutoff' => 'Prediction cutoff date',
     'prediction_scope' => 'Includes the dataset customers you can access. Sales filters apply only to sales metrics and charts.',

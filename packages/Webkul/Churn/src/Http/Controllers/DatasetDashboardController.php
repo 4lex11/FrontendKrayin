@@ -24,6 +24,7 @@ class DatasetDashboardController extends Controller
         $version = config('churn.api.model_version');
 
         return view('churn::dataset.index', [
+            'dashboardRoute' => $request->routeIs('admin.dashboard.index') ? 'admin.dashboard.index' : 'admin.churn.dataset.index',
             'filters' => $filters,
             'options' => $options,
             'summary' => $dashboard->summary($ownerIds, $from, $to, $filters),

@@ -6,12 +6,13 @@ use Webkul\Admin\Http\Controllers\DataGrid\SavedFilterController;
 use Webkul\Admin\Http\Controllers\DataGridController;
 use Webkul\Admin\Http\Controllers\TinyMCEController;
 use Webkul\Admin\Http\Controllers\User\AccountController;
+use Webkul\Churn\Http\Middleware\ShowDatasetDashboard;
 
 /**
  * Dashboard routes.
  */
 Route::controller(DashboardController::class)->prefix('dashboard')->group(function () {
-    Route::get('', 'index')->name('admin.dashboard.index');
+    Route::get('', 'index')->middleware(ShowDatasetDashboard::class)->name('admin.dashboard.index');
 
     Route::get('stats', 'stats')->name('admin.dashboard.stats');
 
