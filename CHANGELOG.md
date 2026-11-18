@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- [Localización] Español predeterminado y formatos de fecha y número en el panel de predicciones.
 - [Deployment] Isolated Render Docker profile with HTTPS, private API credentials, database sessions, bounded Apache processes and a Churn worker. Linux build validation remains pending.
 - [Churn] Seguimiento manual por cliente/corte/versión con responsable, nota, estados, autoría, historial y control de cambios concurrentes.
 - [Churn] Sugerencias orientativas deterministas en listado y detalle, con prioridad de calidad/elegibilidad y revisión humana obligatoria.

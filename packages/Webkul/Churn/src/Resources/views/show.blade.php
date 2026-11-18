@@ -28,12 +28,12 @@
 <section class="rounded-lg border bg-white p-6 dark:bg-gray-900">
 <h2 class="text-lg font-semibold">{{ __('churn::app.detail') }}</h2>
 <dl class="detail-grid mt-4">
-<div><dt>{{ __('churn::app.probability') }}</dt><dd data-testid="detail-probability" class="text-xl font-bold">{{ $prediction ? number_format($prediction->probability * 100, 2).' %' : '—' }}</dd></div>
+<div><dt>{{ __('churn::app.probability') }}</dt><dd data-testid="detail-probability" class="text-xl font-bold">{{ $prediction ? \Illuminate\Support\Number::format($prediction->probability * 100, 2, locale: app()->getLocale()).' %' : '—' }}</dd></div>
 <div><dt>{{ __('churn::app.risk') }}</dt><dd>{{ $prediction->risk ?? __('churn::app.missing') }}</dd></div>
-<div><dt>{{ __('churn::app.cutoff') }}</dt><dd>{{ $cutoff }}</dd></div>
+<div><dt>{{ __('churn::app.cutoff') }}</dt><dd>{{ \Illuminate\Support\Facades\Date::parse($cutoff)->format('d/m/Y') }}</dd></div>
 <div><dt>{{ __('churn::app.model') }}</dt><dd>{{ $modelVersion }}</dd></div>
 <div><dt>{{ __('churn::app.horizon') }}</dt><dd>{{ $prediction->horizon_days ?? 180 }} {{ __('churn::app.days') }}</dd></div>
-<div><dt>{{ __('churn::app.updated') }}</dt><dd>{{ $prediction->predicted_at ?? '—' }}</dd></div>
+<div><dt>{{ __('churn::app.updated') }}</dt><dd>{{ $prediction?->predicted_at ? \Illuminate\Support\Facades\Date::parse($prediction->predicted_at)->format('d/m/Y H:i') : '—' }}</dd></div>
 </dl>
 @if($prediction && $prediction->limited_history)<p class="mt-4">{{ __('churn::app.limited') }}</p>@endif
 <aside class="mt-4 rounded-lg border p-4" data-testid="detail-suggestion" data-advice="{{ $advice }}">
@@ -51,7 +51,7 @@
 <p class="mt-2">{{ $statistics['eligible'] ? __('churn::app.eligible') : __('churn::app.ineligible') }}</p>
 @if($statistics['features'])
 <dl class="detail-grid mt-4">
-@foreach($statistics['features'] as $name => $value)<div><dt>{{ __('churn::app.features_labels.'.$name) }} <span class="text-sm">({{ $name }})</span></dt><dd data-feature="{{ $name }}" class="font-semibold">{{ str_starts_with($name,'Monetary_') ? number_format($value, 4) : $value }}</dd></div>@endforeach
+@foreach($statistics['features'] as $name => $value)<div><dt>{{ __('churn::app.features_labels.'.$name) }} <span class="text-sm">({{ $name }})</span></dt><dd data-feature="{{ $name }}" class="font-semibold">{{ str_starts_with($name,'Monetary_') ? \Illuminate\Support\Number::format($value, 4, locale: app()->getLocale()) : $value }}</dd></div>@endforeach
 </dl>
 @else<p class="mt-4">{{ __('churn::app.no_history') }}</p>@endif
 </section>
@@ -60,7 +60,7 @@
 <div class="scroll-table" tabindex="0" role="region" aria-label="{{ __('churn::app.history') }}"><table><thead><tr>
 @foreach(['cutoff','model','probability','risk','updated'] as $label)<th>{{ __('churn::app.'.$label) }}</th>@endforeach
 </tr></thead><tbody>
-@forelse($history as $item)<tr><td><a class="text-brandColor" href="{{ route('admin.churn.show',['customer'=>$customer->id,'as_of'=>$item->as_of,'version'=>$item->model_version]) }}">{{ $item->as_of }}</a></td><td>{{ $item->model_version }}</td><td>{{ number_format($item->probability*100,2) }} %</td><td>{{ $item->risk }}</td><td>{{ $item->predicted_at }}</td></tr>
+@forelse($history as $item)<tr><td><a class="text-brandColor" href="{{ route('admin.churn.show',['customer'=>$customer->id,'as_of'=>$item->as_of,'version'=>$item->model_version]) }}">{{ \Illuminate\Support\Facades\Date::parse($item->as_of)->format('d/m/Y') }}</a></td><td>{{ $item->model_version }}</td><td>{{ \Illuminate\Support\Number::format($item->probability*100,2, locale: app()->getLocale()) }} %</td><td>{{ $item->risk }}</td><td>{{ \Illuminate\Support\Facades\Date::parse($item->predicted_at)->format('d/m/Y H:i') }}</td></tr>
 @empty<tr><td colspan="5">{{ __('churn::app.missing') }}</td></tr>@endforelse
 </tbody></table></div>
 <nav class="mt-4 flex gap-4" aria-label="{{ __('churn::app.history') }}">

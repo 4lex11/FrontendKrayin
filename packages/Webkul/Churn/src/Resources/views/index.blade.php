@@ -17,7 +17,7 @@
         <header class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             <h1 class="text-xl font-bold dark:text-white">{{ __('churn::app.title') }}</h1>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ __('churn::app.description') }}</p>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ __('churn::app.model') }}: {{ $modelVersion }} · {{ __('churn::app.cutoff') }}: {{ $filters['as_of'] }}</p>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ __('churn::app.model') }}: {{ $modelVersion }} · {{ __('churn::app.cutoff') }}: {{ \Illuminate\Support\Facades\Date::parse($filters['as_of'])->format('d/m/Y') }}</p>
         </header>
         <aside role="note" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <h2 class="font-semibold dark:text-white">{{ __('churn::app.experimental') }}</h2>
@@ -31,7 +31,7 @@
 </div>
 @php($workTotal = array_sum($work['counts']))
 @php($workDone = $work['counts']['completed'] + $work['counts']['error'] + $work['counts']['skipped'])
-<p class="mt-2">{{ $workDone }} / {{ $workTotal }} · {{ $workTotal ? number_format($workDone * 100 / $workTotal, 0) : 0 }} %</p>
+<p class="mt-2">{{ $workDone }} / {{ $workTotal }} · {{ $workTotal ? \Illuminate\Support\Number::format($workDone * 100 / $workTotal, 0, locale: app()->getLocale()) : 0 }} %</p>
 @if(bouncer()->hasPermission('churn.update'))
 <form method="POST" action="{{ route('admin.churn.update') }}" class="mt-4 flex flex-wrap items-center gap-4" data-testid="queue-batch">
 @csrf<input type="hidden" name="scope" value="visible"><input type="hidden" name="as_of" value="{{ $filters['as_of'] }}">
@@ -43,7 +43,7 @@
 @if(count($work['items']))
 <details class="mt-4"><summary>{{ __('churn::app.work_recent') }}</summary>
 <div class="overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('churn::app.work_recent') }}"><table><thead><tr><th class="p-2">{{ __('churn::app.customer') }}</th><th class="p-2">{{ __('churn::app.status') }}</th><th class="p-2">{{ __('churn::app.finished') }}</th></tr></thead><tbody>
-@foreach($work['items'] as $item)<tr><td class="p-2"><a class="text-brandColor" href="{{ route('admin.churn.show',['customer'=>$item->dataset_customer_id,'as_of'=>$item->as_of,'version'=>$item->model_version]) }}">{{ $item->external_customer_id }}</a></td><td class="p-2">{{ __('churn::app.work_states.'.$item->status) }}@if($item->status === 'error') · {{ __('churn::app.work_error') }}@endif</td><td class="p-2">{{ $item->finished_at ?? '—' }}</td></tr>@endforeach
+@foreach($work['items'] as $item)<tr><td class="p-2"><a class="text-brandColor" href="{{ route('admin.churn.show',['customer'=>$item->dataset_customer_id,'as_of'=>$item->as_of,'version'=>$item->model_version]) }}">{{ $item->external_customer_id }}</a></td><td class="p-2">{{ __('churn::app.work_states.'.$item->status) }}@if($item->status === 'error') · {{ __('churn::app.work_error') }}@endif</td><td class="p-2">{{ $item->finished_at ? \Illuminate\Support\Facades\Date::parse($item->finished_at)->format('d/m/Y H:i') : '—' }}</td></tr>@endforeach
 </tbody></table></div></details>
 @endif
 </section>
@@ -110,10 +110,10 @@
                     @forelse ($rows as $row)
                         <tr class="border-b border-gray-200 dark:border-gray-800">
                             <td class="p-4"><a class="font-semibold text-blue-600 underline" href="{{ route('admin.churn.show', ['customer' => $row->id, 'as_of' => $filters['as_of'], 'version' => $modelVersion]) }}">{{ $row->name }}</a><br><span class="text-gray-600 dark:text-gray-300">{{ $row->external_customer_id }}</span></td>
-                            <td class="p-4">{{ $row->prediction_id ? number_format($row->probability * 100, 2).' %' : '—' }}</td>
+                            <td class="p-4">{{ $row->prediction_id ? \Illuminate\Support\Number::format($row->probability * 100, 2, locale: app()->getLocale()).' %' : '—' }}</td>
                             <td class="p-4">{{ $row->risk ?? __('churn::app.missing') }}@if ($row->limited_history)<br><small>{{ __('churn::app.limited') }}</small>@endif</td>
-                            <td class="p-4">{{ $filters['as_of'] }}</td>
-                            <td class="p-4">{{ $row->predicted_at ?? '—' }}</td>
+                            <td class="p-4">{{ \Illuminate\Support\Facades\Date::parse($filters['as_of'])->format('d/m/Y') }}</td>
+                            <td class="p-4">{{ $row->predicted_at ? \Illuminate\Support\Facades\Date::parse($row->predicted_at)->format('d/m/Y H:i') : '—' }}</td>
                             <td class="p-4">
                                 @if ($row->run_status === 'failed')
                                     {{ __('churn::app.'.($row->prediction_id ? 'failed_saved' : 'failed_missing')) }}
